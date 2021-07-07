@@ -29,6 +29,7 @@ for iter = 1:maxiter
     dpf(:, iter) = dp;
     dpprev = dp;
     start = 1;
+    input = X;
     
     %% Layer-wise updates
     for k = 1:num_layers
@@ -42,24 +43,12 @@ for iter = 1:maxiter
 
         
         %% Neuron updates
-        add_input = Qk(1:N(k)/2, 1:N(k)/2)*thrk(1:N(k)/2, 1);
-        b = zeros(N(k), 1);
-        if network.include_labels == 1
-            if k==1
-                b(1:N(k)/2, 1) = repmat([X; Y], num_sub, 1);
-            else
-                b(1:(N(k)/2), :) = [dpf(nidxprev(1:N(k-1)/2), iter); Y];
-            end
-        else
-            if k==1
-                b(1:N(k)/2, 1) = repmat(X, num_sub, 1);
-            elseif k<num_layers
-                b(1:(N(k)/2), :) = dpf(nidxprev(1:N(k-1)/2), iter);
-            else
-                b(1:(N(k)/2), :) = [dpf(nidxprev(1:N(k-1)/2), iter); Y];
-            end
+        if network.include_labels(k) == 1
+            input = [input; Y];
         end
-        b((N(k)/2)+1:N(k), :) = - b(1:N(k)/2, :);
+        input = repmat(input, num_sub(k), 1); 
+        b = [input; -input];
+        add_input = Qk(1:N(k)/2, 1:N(k)/2)*thrk(1:N(k)/2, 1);
         G = -Qk*dp(nidx, 1) + b - [add_input; -add_input] - quantk;
         dp(nidx) = v_c*(G*v_c + Fac(nidx).*dp(nidx))./(dp(nidx).*G + Fac(nidx)*v_c);
         dp(nidx) = a_iter(nidx).*dp(nidx) + (1-a_iter(nidx)).*dpprev(nidx);
@@ -90,7 +79,7 @@ for iter = 1:maxiter
         
         Q{k, 1} = Qk;
         start = start + N(k);
-        nidxprev = nidx;
+        input = dpf(nidx(1:N(k)/2), iter);
         
     end
     

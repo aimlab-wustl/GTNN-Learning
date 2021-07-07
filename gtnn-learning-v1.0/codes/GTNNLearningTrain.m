@@ -14,9 +14,9 @@ N = zeros(network.num_layers, 1);
 for k = 1:network.num_layers
     
     if k<network.num_layers
-        N(k) = 2*(D + M*network.include_labels)*network.num_sub;
+        N(k) = 2*(D + M*network.include_labels(k))*network.num_sub(k);
     else
-        N(k) = 2*((N(k-1)/2) + M);
+        N(k) = 2*((N(k-1)/2) + M*network.include_labels(k))*network.num_sub(k);
     end
     Qk = GTNNLearningGenerateQ(N(k)/2, network.density(k), k, network.network_type(k));
     Q{k, 1} = Qk;

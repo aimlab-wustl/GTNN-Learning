@@ -1,4 +1,4 @@
-function GTNNLearningContour(network, hyperparams, trainedNetwork, procData)
+function GTNNLearningContour(network, hyperparams, trainedNetwork, procData, range, step)
 
 trainxp = procData.trainx; Ytrainp = procData.Ytrain;
 [~, M] = size(Ytrainp);
@@ -6,8 +6,8 @@ Nt = sum(network.N);
 poss_labels = eye(M, M);
 poss_labels(poss_labels==0) = -1;
 
-u1 = 0; u2 = 1;
-[XX, YY] = meshgrid(u1:0.01:u2, u1:0.01:u2);
+u1 = range(1); u2 = range(2);
+[XX, YY] = meshgrid(u1:step:u2, u1:step:u2);
 [s1, s2] = size(XX);
 ZZ = zeros(s1, s2);
 
@@ -20,7 +20,7 @@ for i = 1:s1
         
         for m = 1:M
             
-            [~, ~, spikes, ~, ~] = GTNNLearningWeightAdapt(trainedNetwork.Q, X, poss_labels(m, :)', zeros(Nt, 1), 0, network, hyperparams, trainedNetwork.mask, -0.1*ones(Nt, 1), 0);
+            [~, ~, spikes, ~, ~] = GTNNLearningWeightAdapt(trainedNetwork.Q, X, poss_labels(m, :)', zeros(Nt, 1), 0, hyperparams.maxiter, hyperparams.eta, trainedNetwork.mask, -0.1*ones(Nt, 1), network.N, network.num_sub);
             output_spikes(1, m) = (network.last_layer == 0)*sum(spikes(:)) + (network.last_layer == 1)*sum(sum(spikes(Nt-network.N(end)+1:Nt, :)));
             
         end

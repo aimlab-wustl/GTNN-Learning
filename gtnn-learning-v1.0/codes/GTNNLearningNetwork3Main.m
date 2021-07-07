@@ -65,11 +65,11 @@ load '../data/ucsd-gsd/1shot/batch4';
 %% Design network and set training hyper-parameters
 %% You can also load hyper-parameters used to reproduce results on UCSD GSD dataset by uncommenting line 80
 % network.num_layers = 2;               % Number of layers
-% network.num_sub = 20;                 % Number of sub-networks in layer 1
+% network.num_sub = [20, 1];            % Number of sub-networks in each layer
 % network.density = [1, 1];             % Specify level of sparsity in each layer (1 --> fully-connected); vector dimension should be equal to network.num_layers
 % network.network_type = [1, 1];        % Specify network type for each layer; 1: fully-connected, 2: feed-forward; vector dimension should be equal to network.num_layers
 % network.last_layer = 1;               % 1 --> Considers only spikes from last layer for inference, useful when Y has no linear relationship with X
-% network.include_labels = 1;           % Include labels in layer-wise training
+% network.include_labels = [1, 1];      % Include labels in layer-wise training
 % 
 % hyperparams.improv_epochs = 6;        % Early stopping criterion based on performance on validation set
 % hyperparams.maxiter = 100;            % Number of training iterations per data point per epoch
@@ -91,7 +91,7 @@ procData = GTNNLearningDataPreprocess(trainx, Ytrain, valx, Yval, testx, Ytest, 
 
 %% Plotting results and contours
 flag.plotFlag = 1;              % Plot accuracy and sparsity metric versus epochs
-flag.contourFlag = 0;           % Plot classification boundary (only for 2D data)
+flag.contourFlag = 1;           % Plot classification boundary (only for 2D data)
 
 
 %% Train network
@@ -106,6 +106,6 @@ testResults = GTNNLearningTest(network, hyperparams, trainedNetwork, procData);
 %% Contour plot
 if flag.contourFlag == 1 && size(procData.trainx, 2) == 2
    fprintf('\n Plotting Contour ....');
-   GTNNLearningContour(network, hyperparams, trainedNetwork, procData);
+   GTNNLearningContour(network, hyperparams, trainedNetwork, procData, range, 0.01);
    fprintf('....done\n');
 end
